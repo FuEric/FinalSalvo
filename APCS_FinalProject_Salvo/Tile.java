@@ -1,5 +1,13 @@
 import java.awt.Color;
- 
+
+/**
+ *  Represents a tile of the specified color (colored block).
+ *
+ *  @author  George Peck
+ *  @version Nov 25, 2007
+ *
+ *  @author Sources: Cay Horstmann
+ */  
 public class Tile
 {
 

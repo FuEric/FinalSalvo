@@ -6,24 +6,94 @@ import javax.swing.KeyStroke;
 
 import info.gridworld.grid.*;
 import info.gridworld.world.World;
- 
+  
+/**
+ * Implements Salvo version of Battleship game. BattleField is a grid world of tiles,  
+ * and contains 2 players: a user and an AI player, and each player has a fleet of 
+ * 5 ships. At the start of the game, ships of each fleet are automatically and 
+ * randomly placed. AI's ships are invisible, and user's ship are visible. 
+ * Before the game starts, user has the opportunity to re-arrange his/her 
+ * ship positions by clicking on a ship, and and using arrow (UP, DOWN, LEFT, RIGHT)  
+ * keys to move it. A game is started by clicking on the Step button. The Run button 
+ * should not be clicked at any time. After game starts, each player will take turn  
+ * to choose 5 targets to fire. User chooses firing targets by clicking on upper 
+ * 10 by 10 grid. The game ends when a player sinks all opponent's ships.  
+ * 
+ * @author  Eric Fu
+ * @author  Rohit Sriram
+ * @version 5/24/2017
+ * @author  Period - 3
+ * @author  Assignment - APCS Final Project Salvo
+ *
+ * @author Sources - N/A
+ */ 
 public class BattleField extends World<Tile>
 {
+	/**
+	 * Constant member field: number of rows on each player's side
+	 */
 	public static final int NUM_ROWS = 10;
+
+	/**
+	 * Constant member field: number of columns on each player's side
+	 */
 	public static final int NUM_COLS = 10;
+	
+	/**
+	 * Constant member field: number of black rows used as boundary between upper and
+	 * lower grid
+	 */	
 	public static final int NUM_BOUNDARY_ROWS = 2;
 	
+	/**
+	 * Member field: 2D array to store 2 fleet of ships for 2 players 
+	 */
 	private Ship[][] fleet = new Ship[2][Ship.NUM_SHIPS];
 	
-	private static final int GAME_PHASE_INIT    = 0;
-	private static final int GAME_PHASE_RUNNING = 1;
-	private static final int GAME_PHASE_ENDED   = 2;
-	private int gamePhase;
+
+	/**
+	 * Constant member field: initial game phase
+	 */
+	public static final int GAME_PHASE_INIT    = 0;
+
+	/**
+	 * Constant member field: running game phase
+	 */
+	public static final int GAME_PHASE_RUNNING = 1;
+
+	/**
+	 * Constant member field: ended game phase
+	 */
+	public static final int GAME_PHASE_ENDED   = 2;
+	
+	/**
+	 * Member field: game phase
+	 */
+	private int gamePhase = GAME_PHASE_INIT;
+	
+	/**
+	 * Member field: current turn (i.e., which player)
+	 */
 	private int turn;
+	
+    /**
+     * Member field: an instance of Random object
+     */
 	private Random random;
+	
+    /**
+     * Member field: user player
+     */
 	private UserShooter user;
+	
+    /**
+     * Member field: AI player
+     */
 	private AIShooter   ai;
 	
+	/**
+	 * Constructs a BattleField.
+	 */
 	public BattleField()
 	{
 		super(new BoundedGrid<Tile>(NUM_ROWS * 2 + NUM_BOUNDARY_ROWS, NUM_COLS));
@@ -47,8 +117,23 @@ public class BattleField extends World<Tile>
 		                (turn == Player.USER ? "yours" : "AI's") + "." ); 
 	}
 	
+	/**
+	 * Gets phase of the game.
+	 * 
+	 * @return phase of the game
+	 */
+	public int getGamePhase()
+	{
+		return gamePhase;
+	}
+	
+	/**
+	 * Performs one step. This method is called when the user clicks on the 
+	 * step button, or when run mode has been activated by clicking the run button. 
+	 * 
+	 */
 	@Override
-	public void step()
+	public void step() 
 	{	// Step or Run button clicked
 		if (gamePhase > GAME_PHASE_RUNNING)
 		{
@@ -65,7 +150,8 @@ public class BattleField extends World<Tile>
 		{
 			try 
 			{   // wait for player to click/select targets
-				Thread.yield();  // not working as intended here, so don't click on Run button
+				Thread.yield();  // not working as intended here, so don't click on 
+				                 // Run button. Use Step button only
 				Thread.sleep(3000); // in ms
 				return;
 			}
@@ -127,6 +213,15 @@ public class BattleField extends World<Tile>
 		}
 	}
 	
+	/**
+	 * Acts when a location is clicked. This method is called when the user clicks 
+	 * on a location in the WorldFrame. 
+	 * 
+	 * @param loc  the grid location that the user selected
+	 * 
+	 * @return true if the world consumes the click, or false if the GUI should 
+	 *         invoke the Location->Edit menu action
+	 */
 	@Override
 	public boolean locationClicked(Location loc)
 	{
@@ -163,6 +258,15 @@ public class BattleField extends World<Tile>
 		return clickConsumed;
 	}
 
+	/**
+	 * Acts when a key was pressed. 
+	 * 
+	 * @param description the string describing the key
+	 * @param loc the selected location in the grid at the time the key was pressed 
+	 * 
+	 * @return true if the world consumes the key press, false if the GUI should 
+	 *         consume it.
+	 */
 	@Override
 	public boolean keyPressed(String description, Location loc)
 	{
@@ -183,6 +287,14 @@ public class BattleField extends World<Tile>
 		return false;
 	}
 	
+	/**
+	 * Tries to move the currently selected ship.
+	 * 
+	 * @param selectedShip ship number of the selected ship
+	 * @param keyCode  key code
+	 * 
+	 * @return true if the ship is moved, false otherwise
+	 */
 	private boolean tryMoveSelectedShip(int selectedShip, int keyCode)
 	{
 		boolean moved = false;
@@ -211,11 +323,26 @@ public class BattleField extends World<Tile>
 		return moved;
 	}
 		
+	/**
+	 * Gets ship number of the user's ship at the specified location.
+	 * 
+	 * @param loc location
+	 * 
+	 * @return ship number of the user's ship at the specified location
+	 */
 	private int getSelectedUserShip(Location loc) 
 	{
 		return getShipLocatedAt(Player.USER, loc);
 	}
 	
+	/**
+	 * Gets ship number of the specified player side at the specified location.
+	 * 
+	 * @param side player side
+	 * @param loc location
+	 * 
+	 * @return ship number of the specified player side at the specified location
+	 */
 	private int getShipLocatedAt(int side, Location loc) 
 	{
 		int selected = -1;
@@ -238,7 +365,16 @@ public class BattleField extends World<Tile>
 		return selected;
 	}
 
-	
+	/**
+	 * Creates a ship.
+	 * 
+	 * @param shipNum  ship number
+	 * @param horizontal flag indicating if orientation of ship is horizontal
+	 * @param row row number of the ship location
+	 * @param col column number of the ship location
+	 * 
+	 * @return an instance of ship
+	 */
 	private Ship createShip(int shipNum, boolean horizontal, int row, int col)
 	{
 		switch(shipNum) {
@@ -250,6 +386,9 @@ public class BattleField extends World<Tile>
 		}
 	}
 	
+	/**
+	 * Automatically and randomly populates fleet of ships for each player.
+	 */
 	private void populateFleet() 
 	{	
 		for (int side = Player.USER; side <= Player.AI; side++) 
@@ -275,6 +414,20 @@ public class BattleField extends World<Tile>
 		}
 	}
 
+	/**
+	 * Checks if the specified location is good to place a ship.
+	 * 
+	 * @param side  player side
+	 * @param shipLength length of the ship
+	 * @param horizontal flag indicating if orientation of ship is horizontal
+	 * @param row row number of the ship location
+	 * @param col column number of the ship location
+	 * @param skipShipNo ship number of the ship to skip when checking location 
+	 *                   conflict. It's needed in the case of trying to move a ship.
+	 * 
+	 * @return true if the specified location is good to place a ship, 
+	 *         false otherwise
+	 */
 	private boolean isLocationGoodForShip(int side, int shipLength, 
 					      boolean horizontal, int row, int col, int skipShipNo) {
 		boolean good = 0 <= row && row <= NUM_ROWS && 
@@ -307,6 +460,17 @@ public class BattleField extends World<Tile>
 		return good;
 	}
 	
+	/**
+	 * Checks if the specified location is occupied.
+	 *  
+	 * @param side player side
+	 * @param row row number of the ship location
+	 * @param col column number of the ship location
+	 * @param skipShipNo ship number of the ship to skip when checking location 
+	 *                   conflict. It's needed in the case of trying to move a ship.
+	 *                   
+	 * @return true if the specified location is occupied, false otherwise
+	 */
 	private boolean isPositionOccupied(int side, int row, int col, int skipShipNo)
 	{
 		boolean occupied = false;
@@ -326,6 +490,14 @@ public class BattleField extends World<Tile>
 		return occupied;
 	}
 	
+	/**
+	 * Checks if the whole fleet of the specified side is sunken.
+	 * 
+	 * @param side player side
+	 * 
+	 * @return true if the whole fleet of the specified side is sunken,
+	 *         false otherwise
+	 */
 	private boolean isWholeFleetSunken(int side) 
 	{
 		boolean allSunken = true;
@@ -338,7 +510,9 @@ public class BattleField extends World<Tile>
 		return allSunken;
 	}
 	
-	// populate boundary rows between target grid above and ocean grid below
+	/**
+	 * Populates boundary rows between target grid above and ocean grid below.
+	 */
 	private void populateBoundaryRows() 
 	{
 		Grid<Tile> grid = this.getGrid();
@@ -355,6 +529,9 @@ public class BattleField extends World<Tile>
 		}	
 	}
 	
+	/**
+	 * Shows ships of the user's fleet.
+	 */
 	private void showUserFleet() 
 	{
 		Grid<Tile> grid = this.getGrid();
@@ -393,7 +570,9 @@ public class BattleField extends World<Tile>
 		}	
 	}
 	
-	
+	/**
+	 * Shows the user's target grid.
+	 */
 	private void showUserTargtGrid() 
 	{
 		Grid<Tile> grid = this.getGrid();
@@ -423,12 +602,20 @@ public class BattleField extends World<Tile>
 		}
 	}
 	
+	/**
+	 * Refreshes the user's target grid.
+	 */
 	private void refreshUserTargtGrid()
 	{
 		clearGrid(Player.AI);
 		showUserTargtGrid() ;
 	}
 	
+	/** 
+	 * Clears the grid of the specified side.
+	 * 
+	 * @param side player side
+	 */
 	private void clearGrid(int side) 
 	{
 		Grid<Tile> grid = this.getGrid();
@@ -445,18 +632,29 @@ public class BattleField extends World<Tile>
 		}			
 	}
 	
+	/**
+	 * Refresher the user's fleet on the grid.
+	 */
 	private void refreshUserFleetOnGrid()
 	{
 		clearGrid(Player.USER);
 		showUserFleet() ;
 	}
 	
+	/**
+	 * Refreshes all grids.
+	 */
 	private void refreshGrids()
 	{
 		refreshUserFleetOnGrid();
 		refreshUserTargtGrid();
 	}
 	
+	/**
+	 * Main program.
+	 * 
+	 * @param args command-line arguments
+	 */
 	public static void main(String[] args)
 	{
         BattleField battleField = new BattleField();
