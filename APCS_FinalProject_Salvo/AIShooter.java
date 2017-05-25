@@ -3,7 +3,7 @@ import java.util.*;
 import info.gridworld.grid.*;
    
 /**
- * Implements class of AIShooter.
+ * Implements class AIShooter.
  * 
  * @author  Eric Fu
  * @author  Rohit Sriram

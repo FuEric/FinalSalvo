@@ -8,11 +8,11 @@ import info.gridworld.grid.*;
 import info.gridworld.world.World;
   
 /**
- * Implements Salvo version of Battleship game. BattleField is a grid world of tiles,  
+ * Implements the Salvo version of Battleship. BattleField is a grid world of tiles,  
  * and contains 2 players: a user and an AI player, and each player has a fleet of 
  * 5 ships. At the start of the game, ships of each fleet are automatically and 
  * randomly placed. AI's ships are invisible, and user's ship are visible. 
- * Before the game starts, user has the opportunity to re-arrange his/her 
+ * Before the game starts, the user has the opportunity to re-arrange his/her 
  * ship positions by clicking on a ship, and and using arrow (UP, DOWN, LEFT, RIGHT)  
  * keys to move it. A game is started by clicking on the Step button. The Run button 
  * should not be clicked at any time. After game starts, each player will take turn  
